@@ -208,6 +208,62 @@ public class BookManager {
         }
     }
 
+    private boolean checkBookAvailable(String call_no){
+        try {
+            Statement stm = conn.createStatement();
+            String sql = "SELECT amount FROM BOOKS WHERE call_no = '" + call_no + "'";
+            ResultSet rs = stm.executeQuery(sql);
+            if (!rs.next())
+                return false;
+            int amount = rs.getInt("amount");
+            if (amount > 0) {
+                return true;
+            }
+            else {
+                return false;
+            }
+
+        } catch (SQLException e1) {
+            e1.printStackTrace();
+            noException = false;
+            return false;
+        }
+    }
+
+    private boolean checkStudentReserved(String sno){
+        try {
+            Statement stm = conn.createStatement();
+            String sql = "SELECT * FROM RESERVE WHERE sno = '" + sno + "'";
+            ResultSet rs = stm.executeQuery(sql);
+            if (!rs.next())
+                return false;
+            else {
+                return true;
+            }
+        } catch (SQLException e1) {
+            e1.printStackTrace();
+            noException = false;
+            return true;
+        }
+    }
+
+    private boolean checkStudentBorrowed(String sno, String call_no){
+        try {
+            Statement stm = conn.createStatement();
+            String sql = "SELECT * FROM BORROW WHERE book = '" + call_no + "' AND borrower = '" + sno +"'";
+            ResultSet rs = stm.executeQuery(sql);
+            if (!rs.next())
+                return false;
+            else {
+                return true;
+            }
+
+        } catch (SQLException e1) {
+            e1.printStackTrace();
+            noException = false;
+            return true;
+        }
+    }
 
 
     private void bookReserve() {
@@ -227,9 +283,22 @@ public class BookManager {
         String date = values[2];
 
         //checking
+        if (checkBookAvailable(call_no)) {
+            System.out.println("The book is available, you cannot reserve!");
+            System.out.println("=============================================");
 
-
-
+            return;
+        }
+        if (checkStudentReserved(sno)) {
+            System.out.println("You have already reserved for a book! You cannot reserve anymore!");
+            System.out.println("=============================================");
+            return;
+        }
+        if (checkStudentBorrowed(sno, call_no)){
+            System.out.println("You have borrowed this book!");
+            System.out.println("=============================================");
+            return;
+        }
 
         addReserve(sno, call_no, date);
     }
