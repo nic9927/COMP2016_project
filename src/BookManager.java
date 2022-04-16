@@ -1,4 +1,3 @@
-
 import java.awt.GridLayout;
 import java.awt.TextField;
 import java.awt.event.ComponentAdapter;
@@ -127,8 +126,8 @@ public class BookManager {
      * @return boolean
      */
     public boolean loginDB() {
-        String username = "f0223277";//Replace e1234567 to your username
-        String password = "f0223277";//Replace e1234567 to your password
+        String username = "f0230974";//Replace e1234567 to your username
+        String password = "f0230974";//Replace e1234567 to your password
 
         /* Do not change the code below */
         if(username.equalsIgnoreCase("e1234567") || password.equalsIgnoreCase("e1234567")) {
@@ -208,8 +207,13 @@ public class BookManager {
             }
         }
     }
-    
-      //bookSearch();
+
+
+
+    public BookManager() {
+        System.out.println("Welcome to use this manager!");
+        in = new Scanner(System.in);
+    }
 
     public static void main(String[] args) {
         BookManager manager = new BookManager();
