@@ -17,7 +17,7 @@ CREATE TABLE Books(
 
 
 
-(Many to Many Relationships?)
+
 CREATE TABLE Borrow(
 	b_date DATE,
 	d_date DATE,
@@ -27,7 +27,7 @@ CREATE TABLE Borrow(
 	FOREIGN KEY (book) REFERENCES Books(call_no),
 	FOREIGN KEY (borrower) REFERENCES Students(sno));
 
-(One to Many Relationships?)
+
 CREATE TABLE Reserve(
 	sno CHAR(10),
 	book CHAR(20),
