@@ -149,6 +149,23 @@ public class BookManager {
     }
 
     /**
+     * Close the manager. Do not change this function.
+     */
+    public void close() {
+        System.out.println("Thanks for using this manager! Bye...");
+        try {
+            if (conn != null)
+                conn.close();
+            if (proxySession != null) {
+                proxySession.disconnect();
+            }
+            in.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
      * Show the options. If you want to add one more option, put into the
      * options array above.
      */
@@ -194,7 +211,23 @@ public class BookManager {
     
       //bookSearch();
 
-   
+    public static void main(String[] args) {
+        BookManager manager = new BookManager();
+        if (!manager.loginProxy()) {
+            System.out.println("Login proxy failed, please re-examine your username and password!");
+            return;
+        }
+        if (!manager.loginDB()) {
+            System.out.println("Login database failed, please re-examine your username and password!");
+            return;
+        }
+        System.out.println("Login succeed!");
+        try {
+            manager.run();
+        } finally {
+            manager.close();
+        }
+    }
 
 
 }
