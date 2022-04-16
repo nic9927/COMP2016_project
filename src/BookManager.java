@@ -201,12 +201,68 @@ public class BookManager {
             } else if (options[choice - 1].equals("renew a book")) {
                 //bookRenew();
             } else if (options[choice - 1].equals("reserve a book")) {
-                //bookReserve();
+                bookReserve();
             } else if (options[choice - 1].equals("exit")) {
                 break;
             }
         }
     }
+
+
+
+    private void bookReserve() {
+        System.out.println("Please input your student number, call_no, date:");
+        String line = in.nextLine();
+
+        if (line.equalsIgnoreCase("exit"))
+            return;
+        String[] values = line.split(",");
+
+        if (values.length < 3) {
+            System.out.println("The value number is expected to be 3");
+            return;
+        }
+        String sno = values[0];
+        String call_no = values[1];
+        String date = values[2];
+
+        //checking
+
+
+
+
+        addReserve(sno, call_no, date);
+    }
+
+    /**
+     * Insert data into reserve
+     * 1. call_no, sno,
+     * @return
+     */
+    private void addReserve(String sno, String call_no, String date) {
+        /**
+         * A sample input is:
+         * INSERT INTO Reserve VALUES('12345678', 'A0000', '20-Apr-2022');
+         */
+
+
+        try {
+            Statement stm = conn.createStatement();
+            String sql = "INSERT INTO RESERVE VALUES(" + "'" + sno + "', " + // this is student no
+                    "'" + call_no + "', " + // this is call_no
+                    "'" + date + "'" + //this is reserve date
+                    ")";
+            stm.executeUpdate(sql);
+            stm.close();
+            System.out.println("succeed to reserve book!");
+            //
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.out.println("fail to reserve book " + call_no + "!");
+            noException = false;
+        }
+    }
+
 
 
 
