@@ -282,6 +282,10 @@ public class BookManager {
             return;
         }
         System.out.println("loll");
+        if(!checkOverdue(sno)){
+            return;
+        }
+        System.out.println("lollll");
         if (!checkSecondHalf(sno, call_no)) {
             return;
         }
@@ -290,6 +294,10 @@ public class BookManager {
             return;
         }
         System.out.println("lolllll");
+        if(!checkReserved(call_no)){
+            return;
+        }
+        System.out.println("lollllll");
         addRenew(sno, call_no);
     }
 
@@ -314,6 +322,36 @@ public class BookManager {
             e.printStackTrace();
             System.out.println("fail to renew book " + call_no + "!");
             noException = false;
+        }
+    }
+    
+    //check whether student have overdue book
+    private boolean checkOverdue(String sno){
+        try{
+            Statement stm = conn.createStatement();
+            String sql = "SELECT d_date FROM BORROW WHERE borrower = '" + sno + "'";
+            ResultSet rs = stm.executeQuery(sql);
+            if(!rs.next()){
+                return true;
+            }
+            else {
+                String[] d_date_string = rs.getString("d_date").split(" ");
+
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                LocalDate d_date = LocalDate.parse(d_date_string[0],formatter);
+                LocalDate currentDate = LocalDate.now();
+                if(d_date.isAfter(currentDate)){
+                    System.out.println("You have at least one overdue book, you cannot make a new borrowing");
+                    System.out.println("=============================================");
+                    return false;
+                }else{
+                    return true;
+                }
+            }
+        }catch(SQLException e1){
+            e1.printStackTrace();
+            noException = false;
+            return false;
         }
     }
 
@@ -368,6 +406,27 @@ public class BookManager {
                 return false;
             }
         } catch (SQLException e1) {
+            e1.printStackTrace();
+            noException = false;
+            return false;
+        }
+    }
+    
+    //check whether the book is reserved by any students
+    private boolean checkReserved(String call_no){
+        try{
+            Statement stm = conn.createStatement();
+            String sql = "SELECT d_date FROM RESERVE WHERE book = '" + call_no + "'";
+            ResultSet rs = stm.executeQuery(sql);
+            if(!rs.next()){
+                return true;
+            }
+            else {
+                System.out.println("The book is reserved by another student.");
+                System.out.println("=============================================");
+                return false;
+            }
+        }catch (SQLException e1){
             e1.printStackTrace();
             noException = false;
             return false;
