@@ -7,7 +7,12 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
+import java.time.LocalDate;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import javax.swing.*;
 
@@ -16,6 +21,8 @@ import java.util.Properties;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
+
+import static java.time.temporal.ChronoUnit.DAYS;
 
 public class BookManager {
     Scanner in = null;
@@ -199,12 +206,171 @@ public class BookManager {
             } else if (options[choice - 1].equals("return a book")) {
                 //bookReturn();
             } else if (options[choice - 1].equals("renew a book")) {
-                //bookRenew();
+                bookRenew();
             } else if (options[choice - 1].equals("reserve a book")) {
                 bookReserve();
             } else if (options[choice - 1].equals("exit")) {
                 break;
             }
+        }
+    }
+
+    //to check if the database has this students
+    private boolean checkHaveStudent(String sno) {
+        try {
+            Statement stm = conn.createStatement();
+            String sql = "SELECT sno FROM STUDENTS WHERE sno = '" + sno + "'";
+            ResultSet rs = stm.executeQuery(sql);
+            if (!rs.next()) {
+                System.out.println("Your student number is invalid!");
+                return false;
+            }
+            else {
+                return true;
+            }
+
+            } catch (SQLException e1) {
+            e1.printStackTrace();
+            noException = false;
+            return false;
+        }
+    }
+
+    //to check if the book exist in the database
+    private boolean checkHaveBook(String call_no) {
+        try {
+            Statement stm = conn.createStatement();
+            String sql = "SELECT call_no FROM BOOKS WHERE call_no = '" + call_no + "'";
+            ResultSet rs = stm.executeQuery(sql);
+            if (!rs.next()) {
+                System.out.println("The call_no is invalid!");
+                return false;
+            }
+            else {
+                return true;
+            }
+
+        } catch (SQLException e1) {
+            e1.printStackTrace();
+            noException = false;
+            return false;
+        }
+    }
+
+    private void bookRenew() {
+        System.out.println("Please input your student number, call_no: ");
+        String line = in.nextLine();
+
+        if (line.equalsIgnoreCase("exit"))
+            return;
+        String[] values = line.split(",");
+
+        if (values.length < 2) {
+            System.out.println("The value number is expected to be 2");
+            return;
+        }
+        String sno = values[0];
+        String call_no = values[1];
+
+        if (!checkHaveStudent(sno)) {
+            System.out.println("=============================================");
+            return;
+        }
+        System.out.println("lol");
+        if (!checkHaveBook(call_no)) {
+            System.out.println("=============================================");
+            return;
+        }
+        System.out.println("loll");
+        if (!checkSecondHalf(sno, call_no)) {
+            return;
+        }
+        System.out.println("lolll");
+        if (!checkBookCanRenew(sno, call_no)) {
+            return;
+        }
+        System.out.println("lolllll");
+        addRenew(sno, call_no);
+    }
+
+
+    //check have borrowed -> check have renewed
+    private void addRenew(String sno, String call_no) {
+        /**
+         * A sample input is:
+         * INSERT INTO Renew VALUES('22222222', 'B0000');
+         */
+
+        try {
+            Statement stm = conn.createStatement();
+            String sql = "INSERT INTO RENEW VALUES(" + "'" + sno + "', " + // this is student no
+                    "'" + call_no + "'" + // this is call_no
+                    ")";
+            stm.executeUpdate(sql);
+            stm.close();
+            System.out.println("succeed to renew book!");
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.out.println("fail to renew book " + call_no + "!");
+            noException = false;
+        }
+    }
+
+    private boolean checkSecondHalf(String sno, String call_no){
+        try {
+            Statement stm = conn.createStatement();
+            String sql = "SELECT b_date, d_date FROM BORROW WHERE borrower = '" + sno + "' AND book = '" + call_no + "'";
+            ResultSet rs = stm.executeQuery(sql);
+            if (!rs.next()) {
+                System.out.println("You have not borrowed this book!");
+                System.out.println("=============================================");
+                return false;
+            }
+            else {
+                // 2022-03-24 00:00:00
+                String[] b_date_string = rs.getString("b_date").split(" ");
+                String[] d_date_string = rs.getString("d_date").split(" ");
+
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                LocalDate b_date = LocalDate.parse(b_date_string[0],formatter);
+                LocalDate d_date = LocalDate.parse(d_date_string[0],formatter);
+                long daysBetween = DAYS.between(b_date, d_date);
+                LocalDate mid_date = b_date.plusDays(daysBetween/2);
+                LocalDate currentDate = LocalDate.now();
+                if (mid_date.isAfter(currentDate)){
+                    System.out.println("Mid date: " + mid_date);
+                    System.out.println("Current date: " + currentDate);
+                    System.out.println("You can only renew after second half of borrow period!");
+                    System.out.println("=============================================");
+                    return false;
+                }else {
+                    return true;
+                }
+            }
+        } catch (SQLException e1) {
+            e1.printStackTrace();
+            noException = false;
+            return false;
+        }
+    }
+
+    private boolean checkBookCanRenew(String sno, String call_no){
+        try {
+            Statement stm = conn.createStatement();
+            String sql = "SELECT * FROM RENEW WHERE sno = '" + sno + "' AND book = '" + call_no + "'";
+            ResultSet rs = stm.executeQuery(sql);
+            if (!rs.next())
+                return true;
+            else {
+                System.out.println("You cannot renew this book again!");
+                System.out.println("=============================================");
+                return false;
+            }
+        } catch (SQLException e1) {
+            e1.printStackTrace();
+            noException = false;
+            return false;
         }
     }
 
@@ -283,10 +449,15 @@ public class BookManager {
         String date = values[2];
 
         //checking
+        if (!checkHaveStudent(sno))
+            return;
+
+        if (!checkHaveBook(call_no))
+            return;
+
         if (checkBookAvailable(call_no)) {
             System.out.println("The book is available, you cannot reserve!");
             System.out.println("=============================================");
-
             return;
         }
         if (checkStudentReserved(sno)) {
@@ -299,7 +470,6 @@ public class BookManager {
             System.out.println("=============================================");
             return;
         }
-
         addReserve(sno, call_no, date);
     }
 
