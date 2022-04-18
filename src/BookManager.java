@@ -311,6 +311,28 @@ public class BookManager {
             noException = false;
         }
     }
+	
+	 private boolean checkBookAmount(String sno){
+        try{
+            Statement stm = conn.createStatement();
+            String sql = "SELECT COUNT(*) as sbamount FROM Borrow WHERE borrower = '" + sno + "'";
+            ResultSet rs = stm.executeQuery(sql);
+            if(!rs.next())
+                return true;
+            int amount = rs.getInt("sbamount");
+            if(amount < 5){
+                return true;
+            }
+            else {
+                return false;
+            }
+
+        }catch (SQLException e1){
+            e1.printStackTrace();
+            noException = false;
+            return false;
+        }
+    }
     
     private void addBorrow(String sno, String call_no, String b_date ,String d_date) {
     	 try {
