@@ -299,6 +299,77 @@ public class BookManager {
         }
     }
     
+    private void addBorrow(String sno, String call_no, String b_date ,String d_date) {
+    	 try {
+             Statement stm = conn.createStatement();
+             
+             String sql = "INSERT INTO Borrow VALUES(" + "'" + sno + "'," + // this is student no
+                     "'" + call_no + "'," + // this is call_no
+                     "'" + b_date + "'," + "'" + d_date + "'"+ //this is reserve date
+                     ")";
+             System.out.println(sql);
+             stm.executeUpdate(sql);
+             stm.close();
+             System.out.println("The borrowing succeeded");
+             //
+         } catch (SQLException e) {
+             e.printStackTrace();
+             System.out.println("fail to borrow book " + call_no + "!");
+             noException = false;
+         }
+     }
+    	
+    
+    
+    private void bookBorrow() {
+    	System.out.println("Please input your student number, call_no, b_date: ");
+    	String SNO_call = in.nextLine();
+    	SNO_call = SNO_call.trim();
+    	
+    	if (SNO_call.equalsIgnoreCase("exit"))
+			return;
+		String[] values = SNO_call.split(",");
+
+		if (values.length < 4) {
+			System.out.println("The value number is expected to be 4");
+			return;
+		}
+		
+		String sno = values[0];
+        String call_no = values[1];
+        String b_date = values[2];
+        String d_date = values[3];
+        
+        if (!checkHaveStudent(sno)) {
+            System.out.println("=============================================");
+            return;
+        }
+        System.out.println("lol");
+        if (!checkHaveBook(call_no)) {
+            System.out.println("=============================================");
+            return;
+        }
+        
+        if(!checkBookAvailable (call_no)) {
+        	System.out.println("The book is not available at present");
+        		return;}
+        
+        if(!checkBookAmount(sno)) {
+        	System.out.println("You have already borrowed 5 books");
+        	return;}
+        
+        if (!checkOverdue(sno))
+        		return;
+        System.out.println("loll");
+        if(!checkReserved(sno))
+        	return;
+        
+        addBorrow(sno,call_no,b_date,d_date);
+     
+    	
+    	
+    }
+    
 
     private void bookRenew() {
         System.out.println("Please input your student number, call_no: ");
