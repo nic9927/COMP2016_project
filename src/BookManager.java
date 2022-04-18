@@ -377,7 +377,7 @@ public class BookManager {
     
 /**
  * Asking user to input student number and book's call number
- * if the user and book are available, due date will postpone for two weeks
+ * if the user and book are available, renewal is successful and due date will postpone for two weeks
  * the statement of borrow and renew will be updated when there is a successful renewal
  */
     private void bookRenew() {
@@ -452,8 +452,8 @@ public class BookManager {
     }
     
 /**
-*Check whether the students have any overdue book
-*if yes, he/she will fail in borrowing and renewing books
+* Check whether the students have any overdue book
+* if yes, he/she will fail in borrowing and renewing books
 */
     private boolean checkOverdue(String sno) {
             try {
@@ -542,7 +542,10 @@ public class BookManager {
         }
     }
     
-    //check whether the book is reserved by any students
+/**
+ * Check whether the book is reserved by other student
+ * if yes, the reserve will be failed
+ */
     private boolean checkReserved(String call_no){
         try{
             Statement stm = conn.createStatement();
@@ -562,7 +565,12 @@ public class BookManager {
             return false;
         }
     }
-
+	
+/**
+ * Check whether the book has sufficient amount for user to borrow or reserve
+ * only the book's amount is more than 0
+ * the renewal and reserve will be succeed
+ */
     private boolean checkBookAvailable(String call_no){
         try {
             Statement stm = conn.createStatement();
@@ -585,6 +593,10 @@ public class BookManager {
         }
     }
 
+/**
+ * Check whether the student has reserved any book
+ * Students are only allowed to reserve one book
+ */
     private boolean checkStudentReserved(String sno){
         try {
             Statement stm = conn.createStatement();
@@ -602,6 +614,10 @@ public class BookManager {
         }
     }
 
+/**
+ * If student has already borrowed certain book
+ * he/she is not allowed to reserve it
+ */
     private boolean checkStudentBorrowed(String sno, String call_no){
         try {
             Statement stm = conn.createStatement();
