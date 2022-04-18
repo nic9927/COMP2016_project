@@ -200,9 +200,9 @@ public class BookManager {
                 continue;
             }
             if (options[choice - 1].equals("search a book")) {
-                //bookSearch();
+                bookSearch();
             } else if (options[choice - 1].equals("borrow a book")) {
-                //bookBorrow();
+//                bookBorrow();
             } else if (options[choice - 1].equals("return a book")) {
                 //bookReturn();
             } else if (options[choice - 1].equals("renew a book")) {
@@ -279,7 +279,7 @@ public class BookManager {
 
             Statement stm = conn.createStatement();
 
-            String sql = "SELECT title,author,amount,location FROM Books WHERE ISBN = '"+ ISBN +"'";
+            String sql = "SELECT title,author,amount,location FROM Books WHERE ISBN = '" + ISBN + "'";
             
             System.out.println(sql);
 
@@ -358,7 +358,7 @@ public class BookManager {
         if(!checkBookAvailable (call_no)) {
         	System.out.println("The book is not available at present");
         		return;}
-        
+
         if(!checkBookAmount(sno)) {
         	System.out.println("You have already borrowed 5 books");
         	return;}
@@ -399,28 +399,28 @@ public class BookManager {
             System.out.println("=============================================");
             return;
         }
-        System.out.println("lol");
+
         if (!checkHaveBook(call_no)) {
             System.out.println("=============================================");
             return;
         }
-        System.out.println("loll");
+
         if(!checkOverdue(sno)){
             return;
         }
-        System.out.println("lollll");
+
         if (!checkSecondHalf(sno, call_no)) {
             return;
         }
-        System.out.println("lolll");
+
         if (!checkBookCanRenew(sno, call_no)) {
             return;
         }
-        System.out.println("lolllll");
+
         if(!checkReserved(call_no)){
             return;
         }
-        System.out.println("lollllll");
+
         addRenew(sno, call_no);
     }
 
