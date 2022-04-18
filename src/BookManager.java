@@ -256,6 +256,49 @@ public class BookManager {
             return false;
         }
     }
+    
+     private void bookSearch() {
+        System.out.println("Please input ISBN of the book: ");
+
+        String ISBN = in.nextLine();
+        ISBN = ISBN.trim();
+
+
+        if (ISBN.equalsIgnoreCase("exit"))
+            return;
+
+        try {
+            /**
+             * Create the statement and sql
+             */
+
+            Statement stm = conn.createStatement();
+
+            String sql = "SELECT title,author,amount,location FROM Books WHERE ISBN = '"+ ISBN +"'";
+            
+            System.out.println(sql);
+
+            ResultSet rs = stm.executeQuery(sql);
+
+            if(!rs.next()) {
+                System.out.println("Does not have this book with" + ISBN);
+                return;
+            }
+
+            String[] heads = { "Title", "Author", "Amount", "Location" };
+            for (int i = 0; i < 4; ++i) {
+                try {
+                    System.out.println(heads[i] + " : " + rs.getString(i + 1));
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        } catch (SQLException e1) {
+            e1.printStackTrace();
+            noException = false;
+        }
+    }
+    
 
     private void bookRenew() {
         System.out.println("Please input your student number, call_no: ");
