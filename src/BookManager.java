@@ -215,7 +215,11 @@ public class BookManager {
         }
     }
 
-    //to check if the database has this students
+/**
+    * Check whether the student number is existed in the database 
+    * if the data is not existed,
+    * the input is invalid
+    */
     private boolean checkHaveStudent(String sno) {
         try {
             Statement stm = conn.createStatement();
@@ -236,7 +240,11 @@ public class BookManager {
         }
     }
 
-    //to check if the book exist in the database
+/**
+    * Check whether the book's call number is existed in the database
+    * if the data is not existed,
+    * the input is invalid 
+    */
     private boolean checkHaveBook(String call_no) {
         try {
             Statement stm = conn.createStatement();
@@ -301,6 +309,7 @@ public class BookManager {
             noException = false;
         }
     }
+<<<<<<< HEAD
 
 
     private boolean checkBookAmount(String sno){
@@ -311,6 +320,17 @@ public class BookManager {
             if(!rs.next())
                 return true;
             int amount = rs.getInt("book_amount");
+=======
+	
+	 private boolean checkBookAmount(String sno){
+        try{
+            Statement stm = conn.createStatement();
+            String sql = "SELECT COUNT(*) as sbamount FROM Borrow WHERE borrower = '" + sno + "'";
+            ResultSet rs = stm.executeQuery(sql);
+            if(!rs.next())
+                return true;
+            int amount = rs.getInt("sbamount");
+>>>>>>> ae0a5fd4146252a43aa46c796796d4135817cf45
             if(amount < 5){
                 return true;
             }
@@ -430,10 +450,10 @@ public class BookManager {
     }
     
 /**
- * Asking user to input student number and book's call number
- * if the user and book are available, renewal is successful and due date will postpone for two weeks
- * the statement of borrow and renew will be updated when there is a successful renewal
- */
+    * Asking user to input student number and book's call number
+    * if the user and book are available, renewal is successful and due date will postpone for two weeks
+    * the statement of borrow and renew will be updated when there is a successful renewal
+    */
     private void bookRenew() {
         System.out.println("Please input your student number, call_no: ");
         String line = in.nextLine();
@@ -480,9 +500,9 @@ public class BookManager {
 
 
 /**
- * After renewing book successfully,
- * the information about the book will be inserted into renew table 
- */
+    * After renewing book successfully,
+    * the information about the book will be inserted into renew table 
+    */
     private void addRenew(String sno, String call_no) {
         /**
          * A sample input is:
@@ -506,9 +526,9 @@ public class BookManager {
     }
     
 /**
-* Check whether the students have any overdue book
-* if yes, he/she will fail in borrowing and renewing books
-*/
+    * Check whether the students have any overdue book
+    * if yes, he/she will fail in borrowing and renewing books
+    */
     private boolean checkOverdue(String sno) {
             try {
                 Statement stm = conn.createStatement();
@@ -533,10 +553,10 @@ public class BookManager {
         }
 
 /**
- * Renewal is only allowed during second half borrowing period
- * Check whether the current date is within the second half
- * if no, the renewal will be rejected 
- */
+    * Renewal is only allowed during second half borrowing period
+    * Check whether the current date is within the second half
+    * if no, the renewal will be rejected 
+    */
     private boolean checkSecondHalf(String sno, String call_no){
         try {
             Statement stm = conn.createStatement();
@@ -576,10 +596,10 @@ public class BookManager {
     }
 
 /**
- *  Check whether the book has renewed before
- *  if yes, the renewal will be rejected
- *  Each book can only be renewed for once
- */
+    *  Check whether the book has renewed before
+    *  if yes, the renewal will be rejected
+    *  Each book can only be renewed for once
+    */
     private boolean checkBookCanRenew(String sno, String call_no){
         try {
             Statement stm = conn.createStatement();
@@ -600,9 +620,9 @@ public class BookManager {
     }
     
 /**
- * Check whether the book is reserved by other student
- * if yes, the reserve will be failed
- */
+    * Check whether the book is reserved by other student
+    * if yes, the reservation will be failed
+    */
     private boolean checkReserved(String call_no){
         try{
             Statement stm = conn.createStatement();
@@ -624,10 +644,10 @@ public class BookManager {
     }
 	
 /**
- * Check whether the book has sufficient amount for user to borrow or reserve
- * only the book's amount is more than 0
- * the renewal and reserve will be succeed
- */
+    * Check whether the book has sufficient amount for user to borrow or reserve
+    * only the book's amount more than 0 is allowed
+    * with more than 0 amount, the renewal and reservation will be succeed
+    */
     private boolean checkBookAvailable(String call_no){
         try {
             Statement stm = conn.createStatement();
@@ -651,9 +671,9 @@ public class BookManager {
     }
 
 /**
- * Check whether the student has reserved any book
- * Students are only allowed to reserve one book
- */
+    * Check whether the student has reserved any book
+    * Students are only allowed to reserve one book
+    */
     private boolean checkStudentReserved(String sno){
         try {
             Statement stm = conn.createStatement();
@@ -672,9 +692,9 @@ public class BookManager {
     }
 
 /**
- * If student has already borrowed certain book
- * he/she is not allowed to reserve it
- */
+    * If student has already borrowed certain book
+    * he/she is not allowed to reserve it
+    */
     private boolean checkStudentBorrowed(String sno, String call_no){
         try {
             Statement stm = conn.createStatement();
@@ -693,7 +713,11 @@ public class BookManager {
         }
     }
 
-
+/**
+    * Asking the user to input student number, book's call number and request date
+    * if the user and input meet the following conditions
+    * Book will be reserved successfully
+    */
     private void bookReserve() {
         System.out.println("Please input your student number, call_no, date:");
         String line = in.nextLine();
@@ -739,11 +763,10 @@ public class BookManager {
         addReserve(sno, call_no, date);
     }
 
-    /**
-     * Insert data into reserve
-     * 1. call_no, sno,
-     * @return
-     */
+/**
+    * if the reservation is successful,
+    * student number, book's call number and request date will be inserted into reserve
+    */
     private void addReserve(String sno, String call_no, String date) {
         /**
          * A sample input is:
