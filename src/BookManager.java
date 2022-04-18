@@ -440,34 +440,25 @@ public class BookManager {
     }
     
     //check whether student have overdue book
-    private boolean checkOverdue(String sno){
-        try{
-            Statement stm = conn.createStatement();
-            String sql = "SELECT d_date FROM BORROW WHERE borrower = '" + sno + "'";
-            ResultSet rs = stm.executeQuery(sql);
-            if(!rs.next()){
-                return true;
-            }
-            else {
-                String[] d_date_string = rs.getString("d_date").split(" ");
-
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-                LocalDate d_date = LocalDate.parse(d_date_string[0],formatter);
+    private boolean checkOverdue(String sno) {
+            try {
+                Statement stm = conn.createStatement();
                 LocalDate currentDate = LocalDate.now();
-                if(d_date.isAfter(currentDate)){
-                    System.out.println("You have at least one overdue book, you cannot make a new borrowing");
-                    System.out.println("=============================================");
-                    return false;
-                }else{
+                String sql = "SELECT * FROM BORROW WHERE borrower = '" + sno + "' AND d_date > '" + currentDate + "'";
+                ResultSet rs = stm.executeQuery(sql);
+                if (!rs.next()) {
+                    System.out.println("yeah");
                     return true;
+                } else {
+                    System.out.println("You have at least one overdue book, you cannot make a new borrowing");
+                    return false;
                 }
+            } catch (SQLException e1) {
+                e1.printStackTrace();
+                noException = false;
+                return false;
             }
-        }catch(SQLException e1){
-            e1.printStackTrace();
-            noException = false;
-            return false;
         }
-    }
 
     private boolean checkSecondHalf(String sno, String call_no){
         try {
