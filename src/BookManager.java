@@ -202,7 +202,7 @@ public class BookManager {
             if (options[choice - 1].equals("search a book")) {
                 bookSearch();
             } else if (options[choice - 1].equals("borrow a book")) {
-//                bookBorrow();
+                bookBorrow();
             } else if (options[choice - 1].equals("return a book")) {
                 //bookReturn();
             } else if (options[choice - 1].equals("renew a book")) {
@@ -280,8 +280,6 @@ public class BookManager {
             Statement stm = conn.createStatement();
 
             String sql = "SELECT title,author,amount,location FROM Books WHERE ISBN = '" + ISBN + "'";
-            
-            System.out.println(sql);
 
             ResultSet rs = stm.executeQuery(sql);
 
@@ -303,6 +301,29 @@ public class BookManager {
             noException = false;
         }
     }
+
+
+    private boolean checkBookAmount(String sno){
+        try{
+            Statement stm = conn.createStatement();
+            String sql = "SELECT COUNT(*) as book_amount FROM Borrow WHERE borrower = '" + sno + "'";
+            ResultSet rs = stm.executeQuery(sql);
+            if(!rs.next())
+                return true;
+            int amount = rs.getInt("book_amount");
+            if(amount < 5){
+                return true;
+            }
+            else {
+                return false;
+            }
+
+        }catch (SQLException e1){
+            e1.printStackTrace();
+            noException = false;
+            return false;
+        }
+    }
     
     private void addBorrow(String sno, String call_no, String b_date ,String d_date) {
     	 try {
@@ -312,14 +333,14 @@ public class BookManager {
                      "'" + call_no + "'," + // this is call_no
                      "'" + b_date + "'," + "'" + d_date + "'"+ //this is reserve date
                      ")";
-             System.out.println(sql);
+
              stm.executeUpdate(sql);
              stm.close();
-             System.out.println("The borrowing succeeded");
+             System.out.println("You have borrowed the book successfully!");
              //
          } catch (SQLException e) {
              e.printStackTrace();
-             System.out.println("fail to borrow book " + call_no + "!");
+             System.out.println("Fail to borrow book " + call_no + "!");
              noException = false;
          }
      }
@@ -327,52 +348,85 @@ public class BookManager {
     
     
     private void bookBorrow() {
-    	System.out.println("Please input your student number, call_no, b_date: ");
-    	String SNO_call = in.nextLine();
-    	SNO_call = SNO_call.trim();
-    	
-    	if (SNO_call.equalsIgnoreCase("exit"))
-			return;
-		String[] values = SNO_call.split(",");
+    	System.out.println("Please input your student number, call_no: ");
+    	String line = in.nextLine();
 
-		if (values.length < 4) {
-			System.out.println("The value number is expected to be 4");
+    	if (line.equalsIgnoreCase("exit"))
+			return;
+
+		String[] values = line.trim().split(",");
+
+		if (values.length < 2) {
+			System.out.println("The value number is expected to be 2!");
 			return;
 		}
 		
 		String sno = values[0];
         String call_no = values[1];
-        String b_date = values[2];
-        String d_date = values[3];
         
         if (!checkHaveStudent(sno)) {
             System.out.println("=============================================");
             return;
         }
-        System.out.println("lol");
+
         if (!checkHaveBook(call_no)) {
             System.out.println("=============================================");
             return;
         }
         
         if(!checkBookAvailable (call_no)) {
-        	System.out.println("The book is not available at present");
-        		return;}
+        	System.out.println("The book is not available at present!");
+            System.out.println("=============================================");
+        		return;
+        }
 
         if(!checkBookAmount(sno)) {
-        	System.out.println("You have already borrowed 5 books");
-        	return;}
-        
-        if (!checkOverdue(sno))
-        		return;
-        System.out.println("loll");
-        if(!checkReserved(sno))
+        	System.out.println("You have already borrowed 5 books!");
+            System.out.println("=============================================");
         	return;
+        }
         
+        if (!checkOverdue(sno)) {
+            System.out.println("=============================================");
+            return;
+        }
+
+        // check the borrower is the one who reserved? call_no
+        if(!checkBorrowerReserve(sno,call_no)) {
+            System.out.println("=============================================");
+            return;
+        }
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MMM-yyyy");
+        LocalDate currentDate = LocalDate.now();
+        LocalDate returnDate = currentDate.plusDays(28);
+        String b_date = currentDate.format(formatter);
+        String d_date = returnDate.format(formatter);
+
         addBorrow(sno,call_no,b_date,d_date);
-     
-    	
-    	
+        System.out.println("=============================================");
+    }
+
+    private boolean checkBorrowerReserve(String sno,String call_no) {
+        try {
+            Statement stm = conn.createStatement();
+
+            String sql = "SELECT sno FROM RESERVE WHERE book = '" + call_no + "'";
+            ResultSet rs = stm.executeQuery(sql);
+
+            while(rs.next()){
+                if(rs.getString("sno") != sno){
+                    System.out.println("Someone has reserved this book!");
+                    return false;
+                }
+            }
+            return true;
+
+        } catch (SQLException e1) {
+            e1.printStackTrace();
+            noException = false;
+            return false;
+        }
     }
     
 /**
@@ -386,7 +440,7 @@ public class BookManager {
 
         if (line.equalsIgnoreCase("exit"))
             return;
-        String[] values = line.split(",");
+        String[] values = line.trim().split(",");
 
         if (values.length < 2) {
             System.out.println("The value number is expected to be 2");
@@ -459,13 +513,16 @@ public class BookManager {
             try {
                 Statement stm = conn.createStatement();
                 LocalDate currentDate = LocalDate.now();
-                String sql = "SELECT * FROM BORROW WHERE borrower = '" + sno + "' AND d_date > '" + currentDate + "'";
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MMM-yyyy");
+                String currentDateString = currentDate.format(formatter);
+                String sql = "SELECT * FROM BORROW WHERE borrower = '" + sno + "' AND d_date < '" + currentDateString + "'";
+
+
                 ResultSet rs = stm.executeQuery(sql);
                 if (!rs.next()) {
-                    System.out.println("yeah");
                     return true;
                 } else {
-                    System.out.println("You have at least one overdue book, you cannot make a new borrowing");
+                    System.out.println("You have at least one overdue book, you cannot borrow!");
                     return false;
                 }
             } catch (SQLException e1) {
@@ -643,7 +700,7 @@ public class BookManager {
 
         if (line.equalsIgnoreCase("exit"))
             return;
-        String[] values = line.split(",");
+        String[] values = line.trim().split(",");
 
         if (values.length < 3) {
             System.out.println("The value number is expected to be 3");
@@ -662,6 +719,10 @@ public class BookManager {
 
         if (checkBookAvailable(call_no)) {
             System.out.println("The book is available, you cannot reserve!");
+            System.out.println("=============================================");
+            return;
+        }
+        if (!checkOverdue(sno)) {
             System.out.println("=============================================");
             return;
         }
