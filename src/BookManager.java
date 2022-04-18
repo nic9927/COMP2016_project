@@ -257,6 +257,11 @@ public class BookManager {
         }
     }
     
+/**
+     * Asking user input ISBN of the book
+     * if the book is available
+     * display the title, author, amount, and location
+     */
      private void bookSearch() {
         System.out.println("Please input ISBN of the book: ");
 
@@ -370,7 +375,11 @@ public class BookManager {
     	
     }
     
-
+/**
+ * Asking user to input student number and book's call number
+ * if the user and book are available, due date will postpone for two weeks
+ * the statement of borrow and renew will be updated when there is a successful renewal
+ */
     private void bookRenew() {
         System.out.println("Please input your student number, call_no: ");
         String line = in.nextLine();
@@ -416,7 +425,10 @@ public class BookManager {
     }
 
 
-    //check have borrowed -> check have renewed
+/**
+ * After renewing book successfully,
+ * the information about the book will be inserted into renew table 
+ */
     private void addRenew(String sno, String call_no) {
         /**
          * A sample input is:
@@ -439,7 +451,10 @@ public class BookManager {
         }
     }
     
-    //check whether student have overdue book
+/**
+*Check whether the students have any overdue book
+*if yes, he/she will fail in borrowing and renewing books
+*/
     private boolean checkOverdue(String sno) {
             try {
                 Statement stm = conn.createStatement();
@@ -460,6 +475,11 @@ public class BookManager {
             }
         }
 
+/**
+ * Renewal is only allowed during second half borrowing period
+ * Check whether the current date is within the second half
+ * if no, the renewal will be rejected 
+ */
     private boolean checkSecondHalf(String sno, String call_no){
         try {
             Statement stm = conn.createStatement();
@@ -498,6 +518,11 @@ public class BookManager {
         }
     }
 
+/**
+ *  Check whether the book has renewed before
+ *  if yes, the renewal will be rejected
+ *  Each book can only be renewed for once
+ */
     private boolean checkBookCanRenew(String sno, String call_no){
         try {
             Statement stm = conn.createStatement();
