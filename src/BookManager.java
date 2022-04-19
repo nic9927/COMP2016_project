@@ -400,7 +400,7 @@ public class BookManager {
             if (!rs.next()) {
                 return true;
             } else {
-                System.out.println("You have at least one overdue book, you cannot borrow!");
+                System.out.println("You have at least one overdue book, you cannot borrow or renew!");
                 System.out.println("=============================================");
                 return false;
             }
@@ -841,9 +841,7 @@ public class BookManager {
         if (checkBookAvailableForReserve(call_no)) {
             return;
         }
-        if (!checkOverdue(sno)) {
-            return;
-        }
+
         if (checkStudentReserved(sno)) {
             return;
         }
