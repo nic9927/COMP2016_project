@@ -627,9 +627,9 @@ public class BookManager {
         }
     }
 
-/**
- * add a renewal record
- */
+    /**
+      * add a renewal record
+      */
     private void addRenew(String sno, String call_no) {
 
         try {
@@ -644,6 +644,25 @@ public class BookManager {
         } catch (SQLException e) {
             e.printStackTrace();
             System.out.println("fail to renew book " + call_no + "!");
+            noException = false;
+        }
+    }
+	
+    /**
+      * update the due date in borrow table
+     */	
+    private void updateBorrow(String sno, String call_no) {
+    	try {
+    		Statement stm = conn.createStatement();
+    		String sql = "SELECT d_date FROM BORROW WHERE sno = '" + sno + "' AND call_no = '" + call_no + "'";
+    		ResultSet rs = stm.executeQuery(sql);
+    		String[] d_date_string = rs.getString("d_date").split(" ");
+    		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MMM-yyyy");
+    		LocalDate d_date = LocalDate.parse(d_date_string[0],formatter);
+    		d_date = d_date.plusDays(14);
+    		
+    	}catch (SQLException e1) {
+            e1.printStackTrace();
             noException = false;
         }
     }
@@ -693,6 +712,8 @@ public class BookManager {
         }
 
         addRenew(sno, call_no);
+	    
+	updateBorrow(sno, call_no);
     }
 
 
