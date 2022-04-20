@@ -340,6 +340,7 @@ public class BookManager {
                 return true;
             }
             else {
+                System.out.println(amount);
                 System.out.println("The book is not available at present!");
                 System.out.println("=============================================");
                 return false;
@@ -415,28 +416,51 @@ public class BookManager {
      * checker of bookBorrow
      * Check whether the students who want to borrow the book is the first one who reserve
      * if yes, he/she can borrow the book
-     * if no, he/she cannot borrow the book i because it is reserved by the other student
+     * if no, he/she cannot borrow the book because it is reserved by the other student
      */
     private boolean checkBorrowerReserve(String sno,String call_no) {
-        try {
+        try{
             Statement stm = conn.createStatement();
-
-            String sql = "SELECT sno FROM RESERVE WHERE book = '" + call_no + "'";
+            String sql = "SELECT sno FROM RESERVE WHERE book = '" + call_no + "' ORDER BY reserveDate ASC";
             ResultSet rs = stm.executeQuery(sql);
 
-            while(rs.next()){
-                if(rs.getString("sno") != sno){
-                    System.out.println("Someone has reserved this book!");
-                    System.out.println("=============================================");
+            if(rs.next()){
+                String found_sno = rs.getString("sno").trim();
+                if(!found_sno.equals(sno)){
+                    System.out.println("Someone has reserved this book already!");
                     return false;
+                } else{
+                    deleteReserve(sno,call_no);
+                    System.out.println("Your reserve has been delete!");
+                    return true;
                 }
+            }else {
+                return true;
             }
-            return true;
 
-        } catch (SQLException e1) {
+
+        }catch (SQLException e1){
             e1.printStackTrace();
             noException = false;
             return false;
+        }
+    }
+
+
+
+    /**
+     * delete a reserve record
+     */
+    private void deleteReserve(String sno, String call_no) {
+        try {
+            Statement stm = conn.createStatement();
+            String sql = "DELETE FROM RESERVE WHERE sno = '" + sno + "' AND book = '" + call_no +"'";
+            stm.executeUpdate(sql);
+            stm.close();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            noException = false;
         }
     }
 
@@ -519,7 +543,6 @@ public class BookManager {
         String d_date = returnDate.format(formatter);
 
         addBorrow(sno,call_no,b_date,d_date);
-        System.out.println("=============================================");
     }
 
 
@@ -543,8 +566,6 @@ public class BookManager {
             String sql = "SELECT b_date, d_date FROM BORROW WHERE borrower = '" + sno + "' AND book = '" + call_no + "'";
             ResultSet rs = stm.executeQuery(sql);
             if (!rs.next()) {
-                System.out.println("You have not borrowed this book!");
-                System.out.println("=============================================");
                 return false;
             }
             else {
@@ -578,7 +599,7 @@ public class BookManager {
     }
 
     /**
-     * checker of bookRenew
+     *  checker of bookRenew
      *  Check whether the book has renewed before
      *  if yes, the renewal will be rejected
      *  Each book can only be renewed for once
@@ -713,7 +734,7 @@ public class BookManager {
 
         addRenew(sno, call_no);
 	    
-	updateBorrow(sno, call_no);
+	    updateBorrow(sno, call_no);
     }
 
 
@@ -853,13 +874,15 @@ public class BookManager {
         String date = values[2];
 
         //checking
-        if (!checkHaveStudent(sno))
+        if (!checkHaveStudent(sno)) {
             return;
+        }
 
-        if (!checkHaveBook(call_no))
+        if (!checkHaveBook(call_no)) {
             return;
+        }
 
-        if (checkBookAvailableForReserve(call_no)) {
+        if (!checkBookAvailableForReserve(call_no)) {
             return;
         }
 
@@ -869,6 +892,11 @@ public class BookManager {
         if (checkStudentBorrowed(sno, call_no)){
             return;
         }
+
+        if(checkBorrowerReserve(sno,call_no)){
+            return;
+        }
+
         addReserve(sno, call_no, date);
     }
 
