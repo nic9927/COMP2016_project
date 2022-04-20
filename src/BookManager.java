@@ -401,7 +401,7 @@ public class BookManager {
             if (!rs.next()) {
                 return true;
             } else {
-                System.out.println("You have at least one overdue book, you cannot make a new borrowing!");
+                System.out.println("You have at least one overdue book, you cannot borrow or renew!");
                 System.out.println("=============================================");
                 return false;
             }
@@ -427,7 +427,7 @@ public class BookManager {
             if(rs.next()){
                 String found_sno = rs.getString("sno").trim();
                 if(!found_sno.equals(sno)){
-                    System.out.println("The book is reserved by another student!");
+                    System.out.println("Someone has reserved this book already!");
                     return false;
                 } else{
                     deleteReserve(sno,call_no);
@@ -478,7 +478,7 @@ public class BookManager {
 
              stm.executeUpdate(sql);
              stm.close();
-             System.out.println("The borrowing succeeded.");
+             System.out.println("You have borrowed the book successfully!");
              System.out.println("=============================================");
 
          } catch (SQLException e) {
@@ -583,7 +583,7 @@ public class BookManager {
                 if (mid_date.isAfter(currentDate)){
                     System.out.println("Mid date: " + mid_date);
                     System.out.println("Current date: " + currentDate);
-                    System.out.println("The renewal is not yet available!");
+                    System.out.println("You can only renew after second half of borrow period!");
                     System.out.println("=============================================");
                     return false;
                 }
@@ -612,7 +612,7 @@ public class BookManager {
             if (!rs.next())
                 return true;
             else {
-                System.out.println("This book cannot be renewed again!");
+                System.out.println("You cannot renew this book again!");
                 System.out.println("=============================================");
                 return false;
             }
@@ -626,12 +626,12 @@ public class BookManager {
     /**
      * checker of bookRenew
      * Check whether the book is reserved by other student
-     * if yes, the reserve will be failed
+     * if yes, the renew will be failed
      */
     private boolean checkReserved(String call_no){
         try{
             Statement stm = conn.createStatement();
-            String sql = "SELECT d_date FROM RESERVE WHERE book = '" + call_no + "'";
+            String sql = "SELECT reserveDate FROM RESERVE WHERE book = '" + call_no + "'";
             ResultSet rs = stm.executeQuery(sql);
             if(!rs.next()){
                 return true;
@@ -651,27 +651,27 @@ public class BookManager {
     /**
       * add a renewal record
       */
-    private void addRenew(String sno, String call_no) {
+    private void addRenew(String sno, String book) {
 
         try {
             Statement stm = conn.createStatement();
             String sql = "INSERT INTO RENEW VALUES(" + "'" + sno + "', " + // this is student no
-                    "'" + call_no + "'" + // this is call_no
+                    "'" + book + "'" + // this is call_no
                     ")";
             stm.executeUpdate(sql);
             stm.close();
-            System.out.println("The borrowed book is renewed successfully!");
+            System.out.println("succeed to renew book!");
 
         } catch (SQLException e) {
             e.printStackTrace();
-            System.out.println("fail to renew book " + call_no + "!");
+            System.out.println("fail to renew book " + book + "!");
             noException = false;
         }
     }
 	
     /**
       * update the due date in borrow table
-     */	
+     */
     private void updateBorrow(String sno, String call_no) {
     	try {
     		Statement stm = conn.createStatement();
@@ -681,7 +681,7 @@ public class BookManager {
     		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MMM-yyyy");
     		LocalDate d_date = LocalDate.parse(d_date_string[0],formatter);
     		d_date = d_date.plusDays(14);
-    		
+
     	}catch (SQLException e1) {
             e1.printStackTrace();
             noException = false;
@@ -721,10 +721,12 @@ public class BookManager {
         }
 
         if (!checkSecondHalf(sno, call_no)) {
+
             return;
         }
 
         if (!checkBookCanRenew(sno, call_no)) {
+
             return;
         }
 
@@ -766,7 +768,7 @@ public class BookManager {
                 return true;
             }
             else {
-                System.out.println("The book is now available. No reservation is required!");
+                System.out.println("The book is available, you cannot reserve!");
                 System.out.println("=============================================");
                 return false;
             }
@@ -792,7 +794,7 @@ public class BookManager {
             if (!rs.next())
                 return false;
             else {
-                System.out.println("Multiple reservations are not allowed!");
+                System.out.println("You have already reserved for a book! You cannot reserve anymore!");
                 System.out.println("=============================================");
                 return true;
             }
@@ -816,7 +818,7 @@ public class BookManager {
             if (!rs.next())
                 return false;
             else {
-                System.out.println("Reserving a borrowed book is not allowed!");
+                System.out.println("You have borrowed this book!");
                 System.out.println("=============================================");
                 return true;
             }
@@ -831,16 +833,17 @@ public class BookManager {
     /**
      * add a reserve record
      */
-    private void addReserve(String sno, String call_no, String date) {
+    private void addReserve(String sno, String call_no, String reservationDate) {
         try {
             Statement stm = conn.createStatement();
-            String sql = "INSERT INTO RESERVE VALUES(" + "'" + sno + "', " + // this is student no
-                    "'" + call_no + "', " + // this is call_no
-                    "'" + date + "'" + //this is reserve date
-                    ")";
+            String sql = "INSERT INTO Reserve VALUES(" + "'" + sno + "'," + // this is student no
+                    "'" + call_no + "'," + // this is call_no
+                    "'" + reservationDate +
+                    "')";
+            System.out.println(sql);
             stm.executeUpdate(sql);
             stm.close();
-            System.out.println("The reservation succeeded!");
+            System.out.println("Succeed to reserve book!");
             System.out.println("=============================================");
             //
         } catch (SQLException e) {
@@ -875,25 +878,26 @@ public class BookManager {
 
         //checking
         if (!checkHaveStudent(sno)) {
+            System.out.println("lol");
             return;
         }
 
         if (!checkHaveBook(call_no)) {
+            System.out.println("loll");
             return;
         }
 
         if (!checkBookAvailableForReserve(call_no)) {
+            System.out.println("lolll");
             return;
         }
 
         if (checkStudentReserved(sno)) {
+            System.out.println("lollll" );
             return;
         }
         if (checkStudentBorrowed(sno, call_no)){
-            return;
-        }
-
-        if(checkBorrowerReserve(sno,call_no)){
+            System.out.println("lolllll");
             return;
         }
 
