@@ -401,7 +401,7 @@ public class BookManager {
             if (!rs.next()) {
                 return true;
             } else {
-                System.out.println("You have at least one overdue book, you cannot borrow or renew!");
+                System.out.println("You have at least one overdue book, you cannot make a new borrowing!");
                 System.out.println("=============================================");
                 return false;
             }
