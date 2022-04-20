@@ -427,7 +427,7 @@ public class BookManager {
             if(rs.next()){
                 String found_sno = rs.getString("sno").trim();
                 if(!found_sno.equals(sno)){
-                    System.out.println("Someone has reserved this book already!");
+                    System.out.println("The book is reserved by another student!");
                     return false;
                 } else{
                     deleteReserve(sno,call_no);
@@ -478,7 +478,7 @@ public class BookManager {
 
              stm.executeUpdate(sql);
              stm.close();
-             System.out.println("You have borrowed the book successfully!");
+             System.out.println("The borrowing succeeded.");
              System.out.println("=============================================");
 
          } catch (SQLException e) {
@@ -583,7 +583,7 @@ public class BookManager {
                 if (mid_date.isAfter(currentDate)){
                     System.out.println("Mid date: " + mid_date);
                     System.out.println("Current date: " + currentDate);
-                    System.out.println("You can only renew after second half of borrow period!");
+                    System.out.println("The renewal is not yet available!");
                     System.out.println("=============================================");
                     return false;
                 }
@@ -612,7 +612,7 @@ public class BookManager {
             if (!rs.next())
                 return true;
             else {
-                System.out.println("You cannot renew this book again!");
+                System.out.println("This book cannot be renewed again!");
                 System.out.println("=============================================");
                 return false;
             }
@@ -660,7 +660,7 @@ public class BookManager {
                     ")";
             stm.executeUpdate(sql);
             stm.close();
-            System.out.println("succeed to renew book!");
+            System.out.println("The borrowed book is renewed successfully!");
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -766,7 +766,7 @@ public class BookManager {
                 return true;
             }
             else {
-                System.out.println("The book is available, you cannot reserve!");
+                System.out.println("The book is now available. No reservation is required!");
                 System.out.println("=============================================");
                 return false;
             }
@@ -792,7 +792,7 @@ public class BookManager {
             if (!rs.next())
                 return false;
             else {
-                System.out.println("You have already reserved for a book! You cannot reserve anymore!");
+                System.out.println("Multiple reservations are not allowed!");
                 System.out.println("=============================================");
                 return true;
             }
@@ -816,7 +816,7 @@ public class BookManager {
             if (!rs.next())
                 return false;
             else {
-                System.out.println("You have borrowed this book!");
+                System.out.println("Reserving a borrowed book is not allowed!");
                 System.out.println("=============================================");
                 return true;
             }
@@ -840,7 +840,7 @@ public class BookManager {
                     ")";
             stm.executeUpdate(sql);
             stm.close();
-            System.out.println("Succeed to reserve book!");
+            System.out.println("The reservation succeeded!");
             System.out.println("=============================================");
             //
         } catch (SQLException e) {
