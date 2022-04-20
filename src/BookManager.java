@@ -833,12 +833,12 @@ public class BookManager {
     /**
      * add a reserve record
      */
-    private void addReserve(String sno, String call_no, String reservationDate) {
+    private void addReserve(String sno, String call_no, String reserveDate) {
         try {
             Statement stm = conn.createStatement();
             String sql = "INSERT INTO Reserve VALUES(" + "'" + sno + "'," + // this is student no
                     "'" + call_no + "'," + // this is call_no
-                    "'" + reservationDate +
+                    "'" + reserveDate +
                     "')";
             System.out.println(sql);
             stm.executeUpdate(sql);
