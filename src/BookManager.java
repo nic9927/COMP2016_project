@@ -840,7 +840,6 @@ public class BookManager {
                     "'" + call_no + "'," + // this is call_no
                     "'" + reserveDate +
                     "')";
-            System.out.println(sql);
             stm.executeUpdate(sql);
             stm.close();
             System.out.println("The reservation succeeded!");
