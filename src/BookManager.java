@@ -877,26 +877,21 @@ public class BookManager {
 
         //checking
         if (!checkHaveStudent(sno)) {
-            System.out.println("lol");
             return;
         }
 
         if (!checkHaveBook(call_no)) {
-            System.out.println("loll");
             return;
         }
 
         if (!checkBookAvailableForReserve(call_no)) {
-            System.out.println("lolll");
             return;
         }
 
         if (checkStudentReserved(sno)) {
-            System.out.println("lollll" );
             return;
         }
         if (checkStudentBorrowed(sno, call_no)){
-            System.out.println("lolllll");
             return;
         }
 
